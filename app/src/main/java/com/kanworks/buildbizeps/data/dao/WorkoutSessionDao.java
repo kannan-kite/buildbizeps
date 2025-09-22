@@ -23,6 +23,12 @@ public interface WorkoutSessionDao {
     @Query("SELECT * FROM workout_sessions WHERE DATE(startTime/1000, 'unixepoch') = DATE(:date/1000, 'unixepoch')")
     List<WorkoutSession> getWorkoutSessionsByDate(Date date);
     
+    @Query("DELETE FROM workout_sessions WHERE DATE(startTime/1000, 'unixepoch') = DATE(:date/1000, 'unixepoch')")
+    void deleteSessionsByDate(Date date);
+    
+    @Query("DELETE FROM workout_sessions")
+    void deleteAllSessions();
+    
     @Insert
     long insertWorkoutSession(WorkoutSession workoutSession);
     

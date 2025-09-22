@@ -1,9 +1,13 @@
 package com.kanworks.buildbizeps.ui.dashboard;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,6 +53,7 @@ public class DashboardFragment extends Fragment {
         selectedDate = new Date();
         
         setupCalendarView();
+        setupHistoryButtons();
         loadDailySummary(selectedDate);
         
         return root;
@@ -140,6 +145,88 @@ public class DashboardFragment extends Fragment {
         );
         
         binding.textDailySummary.setText(summaryText);
+    }
+    
+    private void setupHistoryButtons() {
+        // Clear Selected Day button
+        binding.btnClearDay.setOnClickListener(v -> {
+            if (selectedDate == null) {
+                Toast.makeText(getContext(), "Please select a date first", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            
+            String dateStr = dateFormat.format(selectedDate);
+            new AlertDialog.Builder(getContext())
+                .setTitle("Clear Day History")
+                .setMessage("Are you sure you want to delete all workout data for " + dateStr + "?")
+                .setPositiveButton("Delete", (dialog, which) -> clearDayHistory(selectedDate))
+                .setNegativeButton("Cancel", null)
+                .show();
+        });
+        
+        // Clear All History button
+        binding.btnClearAll.setOnClickListener(v -> {
+            new AlertDialog.Builder(getContext())
+                .setTitle("Clear All History")
+                .setMessage("⚠️ WARNING: This will permanently delete ALL workout history!\n\nThis action cannot be undone. Are you sure?")
+                .setPositiveButton("Delete All", (dialog, which) -> clearAllHistory())
+                .setNegativeButton("Cancel", null)
+                .show();
+        });
+    }
+    
+    private void clearDayHistory(Date date) {
+        executor.execute(() -> {
+            try {
+                // Delete records and sessions for the selected date
+                database.exerciseRecordDao().deleteRecordsByDate(date);
+                database.workoutSessionDao().deleteSessionsByDate(date);
+                
+                // Update UI on main thread
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        Toast.makeText(getContext(), "Day history cleared successfully", Toast.LENGTH_SHORT).show();
+                        // Refresh the current day's summary
+                        loadDailySummary(selectedDate);
+                    });
+                }
+                
+            } catch (Exception e) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> 
+                        Toast.makeText(getContext(), "Error clearing day history: " + e.getMessage(), 
+                                     Toast.LENGTH_SHORT).show()
+                    );
+                }
+            }
+        });
+    }
+    
+    private void clearAllHistory() {
+        executor.execute(() -> {
+            try {
+                // Delete all records and sessions
+                database.exerciseRecordDao().deleteAllRecords();
+                database.workoutSessionDao().deleteAllSessions();
+                
+                // Update UI on main thread
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        Toast.makeText(getContext(), "All history cleared successfully", Toast.LENGTH_SHORT).show();
+                        // Refresh the current day's summary
+                        loadDailySummary(selectedDate);
+                    });
+                }
+                
+            } catch (Exception e) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> 
+                        Toast.makeText(getContext(), "Error clearing all history: " + e.getMessage(), 
+                                     Toast.LENGTH_SHORT).show()
+                    );
+                }
+            }
+        });
     }
     
     @Override

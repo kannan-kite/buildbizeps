@@ -35,6 +35,12 @@ public interface ExerciseRecordDao {
     @Query("SELECT COUNT(*) FROM exercise_records WHERE DATE(timestamp/1000, 'unixepoch') = DATE(:date/1000, 'unixepoch')")
     int getWorkoutCountForDate(Date date);
     
+    @Query("DELETE FROM exercise_records WHERE DATE(timestamp/1000, 'unixepoch') = DATE(:date/1000, 'unixepoch')")
+    void deleteRecordsByDate(Date date);
+    
+    @Query("DELETE FROM exercise_records")
+    void deleteAllRecords();
+    
     @Insert
     long insertExerciseRecord(ExerciseRecord exerciseRecord);
     

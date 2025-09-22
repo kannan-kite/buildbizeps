@@ -61,6 +61,47 @@
 
         </LinearLayout>
 
+        <!-- History Management Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🗂️ History Management"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="12dp"
+            android:textColor="@android:color/holo_blue_dark" />
+
+        <!-- History Control Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="16dp">
+
+            <Button
+                android:id="@+id/btn_clear_day"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:text="Clear Selected Day"
+                android:textSize="14sp"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/red_500" />
+
+            <Button
+                android:id="@+id/btn_clear_all"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:text="Clear All History"
+                android:textSize="14sp"
+                android:layout_marginStart="8dp"
+                android:backgroundTint="@android:color/holo_red_dark" />
+
+        </LinearLayout>
+
         <!-- Motivational Section -->
         <TextView
             android:layout_width="match_parent"
