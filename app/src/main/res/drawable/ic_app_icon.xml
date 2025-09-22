@@ -1,0 +1,45 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Background Circle -->
+    <path
+        android:fillColor="#00E5FF"
+        android:pathData="M54,54m-50,0a50,50 0,1 1,100 0a50,50 0,1 1,-100 0"/>
+    
+    <!-- Muscle/Bicep Design -->
+    <!-- Upper arm -->
+    <path
+        android:fillColor="#0D47A1"
+        android:pathData="M35,35 Q40,30 50,32 Q60,35 65,45 Q68,55 65,65 Q60,70 50,68 Q40,65 35,55 Z"/>
+    
+    <!-- Forearm -->
+    <path
+        android:fillColor="#1565C0"
+        android:pathData="M50,68 Q55,70 62,75 Q68,80 70,88 Q68,92 62,90 Q55,85 50,80 Z"/>
+    
+    <!-- Bicep muscle highlight -->
+    <path
+        android:fillColor="#42A5F5"
+        android:pathData="M42,40 Q48,38 55,42 Q58,48 55,55 Q50,58 45,55 Q40,50 42,40 Z"/>
+    
+    <!-- Hand/Fist -->
+    <path
+        android:fillColor="#0D47A1"
+        android:pathData="M62,88 Q68,86 72,90 Q74,95 70,98 Q65,100 60,96 Q58,92 62,88 Z"/>
+    
+    <!-- Muscle definition lines -->
+    <path
+        android:strokeColor="#00ACC1"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M45,45 Q50,43 55,48"/>
+    
+    <path
+        android:strokeColor="#00ACC1"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"
+        android:pathData="M48,52 Q52,50 56,55"/>
+</vector>
