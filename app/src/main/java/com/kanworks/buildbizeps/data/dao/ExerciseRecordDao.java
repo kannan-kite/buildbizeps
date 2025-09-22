@@ -29,6 +29,12 @@ public interface ExerciseRecordDao {
     @Query("SELECT SUM(reps) FROM exercise_records WHERE exerciseId = :exerciseId AND DATE(timestamp/1000, 'unixepoch') = DATE(:date/1000, 'unixepoch')")
     int getTotalRepsByExerciseAndDate(int exerciseId, Date date);
     
+    @Query("SELECT DISTINCT DATE(timestamp/1000, 'unixepoch') as workout_date FROM exercise_records ORDER BY workout_date DESC")
+    List<String> getWorkoutDates();
+    
+    @Query("SELECT COUNT(*) FROM exercise_records WHERE DATE(timestamp/1000, 'unixepoch') = DATE(:date/1000, 'unixepoch')")
+    int getWorkoutCountForDate(Date date);
+    
     @Insert
     long insertExerciseRecord(ExerciseRecord exerciseRecord);
     
