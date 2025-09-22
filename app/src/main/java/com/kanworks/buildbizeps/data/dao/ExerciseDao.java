@@ -22,6 +22,15 @@ public interface ExerciseDao {
     @Query("SELECT * FROM exercises WHERE muscleGroup = :muscleGroup")
     List<Exercise> getExercisesByMuscleGroup(String muscleGroup);
     
+    @Query("SELECT * FROM exercises WHERE isFavorite = 1")
+    List<Exercise> getFavoriteExercises();
+    
+    @Query("SELECT * FROM exercises WHERE isCustom = 1")
+    List<Exercise> getCustomExercises();
+    
+    @Query("UPDATE exercises SET isFavorite = :isFavorite WHERE id = :exerciseId")
+    void updateFavoriteStatus(int exerciseId, boolean isFavorite);
+    
     @Insert
     long insertExercise(Exercise exercise);
     

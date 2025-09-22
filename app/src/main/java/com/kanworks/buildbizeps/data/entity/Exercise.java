@@ -12,6 +12,8 @@ public class Exercise {
     private String type; // "strength", "cardio", etc.
     private String description;
     private String muscleGroup;
+    private boolean isFavorite; // New field for favorites
+    private boolean isCustom;   // Track if user-created or default
     
     // Constructors
     public Exercise() {}
@@ -21,6 +23,17 @@ public class Exercise {
         this.type = type;
         this.description = description;
         this.muscleGroup = muscleGroup;
+        this.isFavorite = false;
+        this.isCustom = false;
+    }
+    
+    public Exercise(String name, String type, String description, String muscleGroup, boolean isCustom) {
+        this.name = name;
+        this.type = type;
+        this.description = description;
+        this.muscleGroup = muscleGroup;
+        this.isFavorite = false;
+        this.isCustom = isCustom;
     }
     
     // Getters and Setters
@@ -38,4 +51,10 @@ public class Exercise {
     
     public String getMuscleGroup() { return muscleGroup; }
     public void setMuscleGroup(String muscleGroup) { this.muscleGroup = muscleGroup; }
+    
+    public boolean isFavorite() { return isFavorite; }
+    public void setFavorite(boolean favorite) { isFavorite = favorite; }
+    
+    public boolean isCustom() { return isCustom; }
+    public void setCustom(boolean custom) { isCustom = custom; }
 }

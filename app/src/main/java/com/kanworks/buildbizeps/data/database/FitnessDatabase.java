@@ -16,7 +16,7 @@ import com.kanworks.buildbizeps.data.entity.WorkoutSession;
 
 @Database(
     entities = {Exercise.class, WorkoutSession.class, ExerciseRecord.class},
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 @TypeConverters({DateConverter.class})
@@ -35,6 +35,7 @@ public abstract class FitnessDatabase extends RoomDatabase {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                             FitnessDatabase.class, "fitness_database")
                             .allowMainThreadQueries() // For simplicity - in production, use background threads
+                            .fallbackToDestructiveMigration() // Handle schema changes
                             .build();
                 }
             }
