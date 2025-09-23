@@ -1,5 +1,6 @@
 package com.kanworks.buildbizeps.ui.home;
 
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -279,6 +281,27 @@ public class HomeFragment extends Fragment {
             public void afterTextChanged(android.text.Editable s) {}
         });
         
+        // Add focus change listener to hide keyboard when focus is lost
+        weightInput.setOnFocusChangeListener((v, hasFocus) -> {
+            if (!hasFocus) {
+                hideKeyboard();
+            }
+        });
+        
+        // Add editor action listener to hide keyboard when user presses "Done"
+        weightInput.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_DONE || 
+                actionId == android.view.inputmethod.EditorInfo.IME_ACTION_NEXT) {
+                hideKeyboard();
+                v.clearFocus();
+                return true;
+            }
+            return false;
+        });
+        
+        // Set IME options to show "Done" button
+        weightInput.setImeOptions(android.view.inputmethod.EditorInfo.IME_ACTION_DONE);
+        
         exerciseWeightViews.put(exerciseId, weightInput);
         weightSection.addView(weightInput);
 
@@ -371,6 +394,15 @@ public class HomeFragment extends Fragment {
         Log.d("HomeFragment", "=== INCREMENT REPS BUTTON PRESSED ===");
         Log.d("HomeFragment", "Exercise ID: " + exerciseId);
         
+        // Hide keyboard and clear focus from weight input when user interacts with reps buttons
+        hideKeyboard();
+        if (getView() != null) {
+            View focusedView = getView().findFocus();
+            if (focusedView != null) {
+                focusedView.clearFocus();
+            }
+        }
+        
         int currentReps = exerciseReps.get(exerciseId);
         Log.d("HomeFragment", "Current reps before increment: " + currentReps);
         
@@ -385,6 +417,15 @@ public class HomeFragment extends Fragment {
     private void decrementReps(int exerciseId) {
         Log.d("HomeFragment", "=== DECREMENT REPS BUTTON PRESSED ===");
         Log.d("HomeFragment", "Exercise ID: " + exerciseId);
+        
+        // Hide keyboard and clear focus from weight input when user interacts with reps buttons
+        hideKeyboard();
+        if (getView() != null) {
+            View focusedView = getView().findFocus();
+            if (focusedView != null) {
+                focusedView.clearFocus();
+            }
+        }
         
         int currentReps = exerciseReps.get(exerciseId);
         Log.d("HomeFragment", "Current reps before decrement: " + currentReps);
@@ -573,6 +614,13 @@ public class HomeFragment extends Fragment {
                     currentSession = null; // Reset on any error
                 }
             });
+        }
+    }
+    
+    private void hideKeyboard() {
+        if (getActivity() != null && getView() != null) {
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
         }
     }
     
