@@ -1,19 +1,31 @@
 package com.kanworks.buildbizeps.ui.home;
 
+import android.content.res.ColorStateList;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
+import com.kanworks.buildbizeps.R;
 import com.kanworks.buildbizeps.databinding.FragmentHomeBinding;
 import com.kanworks.buildbizeps.data.database.FitnessDatabase;
 import com.kanworks.buildbizeps.data.entity.Exercise;
@@ -38,6 +50,7 @@ public class HomeFragment extends Fragment {
     private Map<Integer, Integer> exerciseReps = new HashMap<>();
     private Map<Integer, EditText> exerciseWeightViews = new HashMap<>();
     private Map<Integer, TextView> exerciseRepsViews = new HashMap<>();
+    private Map<Integer, MaterialButton> exerciseSaveButtons = new HashMap<>();
     private List<Exercise> favoriteExercises;
     
     // Store individual sets for each exercise (for calculating total sets)
@@ -45,7 +58,6 @@ public class HomeFragment extends Fragment {
     
     // Workout tracking variables
     private WorkoutSession currentSession;
-    private boolean workoutInProgress = false;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -57,7 +69,6 @@ public class HomeFragment extends Fragment {
         database = FitnessDatabase.getDatabase(getContext());
         executor = Executors.newSingleThreadExecutor();
         
-        setupWorkoutButtons();
         loadFavoriteExercises();
         
         return root;
@@ -89,16 +100,18 @@ public class HomeFragment extends Fragment {
     }
     
     private void showNoFavoritesMessage() {
-        LinearLayout container = binding.exercisesContainer;
-        container.removeAllViews();
+        Log.d("HomeFragment", "No favorite exercises found - showing empty state");
         
-        TextView message = new TextView(getContext());
-        message.setText("📝 No favorite exercises selected!\n\nGo to Settings to add exercises and mark them as favorites.");
-        message.setTextSize(16);
-        message.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-        message.setPadding(32, 64, 32, 64);
+        // Show the empty state card
+        View noFavoritesCard = binding.getRoot().findViewById(R.id.card_no_favorites);
+        if (noFavoritesCard != null) {
+            noFavoritesCard.setVisibility(View.VISIBLE);
+        }
         
-        container.addView(message);
+        // Hide the exercises container
+        if (binding.exercisesContainer != null) {
+            binding.exercisesContainer.setVisibility(View.GONE);
+        }
     }
     
     private void createExerciseSections() {
@@ -119,62 +132,102 @@ public class HomeFragment extends Fragment {
     }
     
     private void createExerciseSection(Exercise exercise, LinearLayout container) {
-        // Create main section layout
-        LinearLayout section = new LinearLayout(getContext());
-        section.setOrientation(LinearLayout.VERTICAL);
-        section.setPadding(20, 20, 20, 20);
-        section.setBackground(getResources().getDrawable(android.R.drawable.dialog_holo_light_frame));
+        Log.d("HomeFragment", "Creating section for exercise: " + exercise.getName());
         
-        LinearLayout.LayoutParams sectionParams = new LinearLayout.LayoutParams(
+        // Create main card using MaterialCardView
+        com.google.android.material.card.MaterialCardView cardView = new com.google.android.material.card.MaterialCardView(getContext());
+        LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        sectionParams.setMargins(0, 0, 0, 24);
-        section.setLayoutParams(sectionParams);
+        cardParams.bottomMargin = (int) (16 * getResources().getDisplayMetrics().density);
+        cardView.setLayoutParams(cardParams);
+        cardView.setCardElevation(4 * getResources().getDisplayMetrics().density);
+        cardView.setRadius(16 * getResources().getDisplayMetrics().density);
+        cardView.setUseCompatPadding(true);
         
-        // Exercise title
-        TextView titleView = new TextView(getContext());
-        titleView.setText(getExerciseEmoji(exercise) + " " + exercise.getName());
-        titleView.setTextSize(22);
-        titleView.setTextColor(getResources().getColor(android.R.color.black));
-        titleView.setGravity(android.view.Gravity.CENTER);
-        titleView.setTypeface(null, android.graphics.Typeface.BOLD);
-        section.addView(titleView);
+        // Main container
+        LinearLayout mainLayout = new LinearLayout(getContext());
+        mainLayout.setOrientation(LinearLayout.VERTICAL);
+        mainLayout.setPadding(
+            (int) (20 * getResources().getDisplayMetrics().density),
+            (int) (20 * getResources().getDisplayMetrics().density),
+            (int) (20 * getResources().getDisplayMetrics().density),
+            (int) (20 * getResources().getDisplayMetrics().density)
+        );
+        
+        // Exercise title with icon
+        LinearLayout headerLayout = new LinearLayout(getContext());
+        headerLayout.setOrientation(LinearLayout.HORIZONTAL);
+        headerLayout.setGravity(Gravity.CENTER_VERTICAL);
+        LinearLayout.LayoutParams headerParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        headerParams.bottomMargin = (int) (16 * getResources().getDisplayMetrics().density);
+        headerLayout.setLayoutParams(headerParams);
+        
+        // Exercise name
+        TextView exerciseTitle = new TextView(getContext());
+        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(
+            0,
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            1.0f
+        );
+        exerciseTitle.setLayoutParams(titleParams);
+        exerciseTitle.setText(getExerciseEmoji(exercise) + " " + exercise.getName());
+        exerciseTitle.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18);
+        exerciseTitle.setTypeface(exerciseTitle.getTypeface(), Typeface.BOLD);
         
         // Sets completed indicator
         TextView setsCompletedView = new TextView(getContext());
         setsCompletedView.setText("Sets completed: 0");
-        setsCompletedView.setTextSize(14);
-        setsCompletedView.setTextColor(getResources().getColor(android.R.color.darker_gray));
-        setsCompletedView.setGravity(android.view.Gravity.CENTER);
-        setsCompletedView.setPadding(0, 8, 0, 16);
-        section.addView(setsCompletedView);
+        setsCompletedView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+        setsCompletedView.setTag("sets_counter_" + exercise.getId());
+        
+        headerLayout.addView(exerciseTitle);
+        headerLayout.addView(setsCompletedView);
         
         // Weight input section
         LinearLayout weightSection = createWeightInputSection(exercise.getId());
-        section.addView(weightSection);
         
-        // Reps section  
+        // Reps counter section  
         LinearLayout repsSection = createRepsCounterSection(exercise.getId());
-        section.addView(repsSection);
         
-        // Save Set button
-        Button saveSetBtn = new Button(getContext());
-        saveSetBtn.setText("💾 Save Set");
-        saveSetBtn.setTextSize(16);
-        saveSetBtn.setBackgroundColor(getResources().getColor(android.R.color.holo_blue_bright));
-        saveSetBtn.setTextColor(getResources().getColor(android.R.color.white));
-        saveSetBtn.setTypeface(null, android.graphics.Typeface.BOLD);
-        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
+        // Save set button
+        com.google.android.material.button.MaterialButton saveSetButton = new com.google.android.material.button.MaterialButton(getContext());
+        LinearLayout.LayoutParams buttonParams = new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
+            (int) (48 * getResources().getDisplayMetrics().density)
         );
-        btnParams.setMargins(0, 16, 0, 0);
-        saveSetBtn.setLayoutParams(btnParams);
-        saveSetBtn.setOnClickListener(v -> saveSet(exercise.getId(), setsCompletedView));
-        section.addView(saveSetBtn);
+        buttonParams.topMargin = (int) (16 * getResources().getDisplayMetrics().density);
+        saveSetButton.setLayoutParams(buttonParams);
+        saveSetButton.setText("💾 Save Set");
+        saveSetButton.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        saveSetButton.setCornerRadius((int) (24 * getResources().getDisplayMetrics().density));
+        saveSetButton.setEnabled(false);
+        saveSetButton.setTag("save_set_button_" + exercise.getId());
         
-        container.addView(section);
+        // Store button reference for enable/disable functionality
+        exerciseSaveButtons.put(exercise.getId(), saveSetButton);
+        
+        saveSetButton.setOnClickListener(v -> saveSet(exercise.getId(), setsCompletedView));
+        
+        // Add all sections to main layout
+        mainLayout.addView(headerLayout);
+        mainLayout.addView(weightSection);
+        mainLayout.addView(repsSection);
+        mainLayout.addView(saveSetButton);
+        
+        cardView.addView(mainLayout);
+        container.addView(cardView);
+        
+        // Initialize tracking data
+        exerciseReps.put(exercise.getId(), 0);
+        exerciseWeights.put(exercise.getId(), 0.0f);
+        exerciseSetCounts.put(exercise.getId(), 0);
+        
+        Log.d("HomeFragment", "Exercise section created for: " + exercise.getName());
     }
     
     private LinearLayout createWeightInputSection(int exerciseId) {
@@ -212,9 +265,23 @@ public class HomeFragment extends Fragment {
         weightInput.setLayoutParams(inputParams);
         weightInput.setPadding(16, 16, 16, 16);
         
+        // Add text change listener to enable save button when both weight and reps are set
+        weightInput.addTextChangedListener(new android.text.TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                updateSaveButtonState(exerciseId);
+            }
+            
+            @Override
+            public void afterTextChanged(android.text.Editable s) {}
+        });
+        
         exerciseWeightViews.put(exerciseId, weightInput);
         weightSection.addView(weightInput);
-        
+
         return weightSection;
     }
     
@@ -311,6 +378,7 @@ public class HomeFragment extends Fragment {
         Log.d("HomeFragment", "New reps after increment: " + (currentReps + 1));
         
         updateRepsDisplay(exerciseId);
+        updateSaveButtonState(exerciseId);
         Log.d("HomeFragment", "Reps display updated for exercise " + exerciseId);
     }
     
@@ -325,6 +393,7 @@ public class HomeFragment extends Fragment {
             exerciseReps.put(exerciseId, currentReps - 1);
             Log.d("HomeFragment", "Decremented reps to: " + (currentReps - 1));
             updateRepsDisplay(exerciseId);
+            updateSaveButtonState(exerciseId);
             Log.d("HomeFragment", "Reps display updated for exercise " + exerciseId);
         } else {
             Log.d("HomeFragment", "Cannot decrement reps - count is already 0");
@@ -344,11 +413,6 @@ public class HomeFragment extends Fragment {
     private void saveSet(int exerciseId, TextView setsCompletedView) {
         Log.d("HomeFragment", "=== SAVE SET BUTTON PRESSED ===");
         Log.d("HomeFragment", "Exercise ID: " + exerciseId);
-        
-        if (!workoutInProgress) {
-            Toast.makeText(getContext(), "Please start a workout first!", Toast.LENGTH_SHORT).show();
-            return;
-        }
         
         // Get weight from input
         EditText weightInput = exerciseWeightViews.get(exerciseId);
@@ -376,38 +440,74 @@ public class HomeFragment extends Fragment {
         
         executor.execute(() -> {
             try {
-                if (currentSession != null) {
-                    // Create and save exercise record for this individual set
-                    ExerciseRecord record = new ExerciseRecord(
-                        exerciseId, 
-                        currentSession.getId(),  // Use session ID
-                        1,  // Always 1 set per record
-                        finalReps
-                    );
-                    record.setWeight(finalWeight);
-                    database.exerciseRecordDao().insertExerciseRecord(record);
-                    
-                    // Update set count
-                    int currentSetCount = exerciseSetCounts.get(exerciseId);
-                    exerciseSetCounts.put(exerciseId, currentSetCount + 1);
-                    
+                // Verify exercise exists first
+                Exercise exercise = database.exerciseDao().getExerciseById(exerciseId);
+                if (exercise == null) {
+                    Log.e("HomeFragment", "ERROR: Exercise with ID " + exerciseId + " does not exist!");
                     if (getActivity() != null) {
-                        getActivity().runOnUiThread(() -> {
-                            // Reset reps counter for next set
-                            exerciseReps.put(exerciseId, 0);
-                            updateRepsDisplay(exerciseId);
-                            
-                            // Update sets completed display
-                            int newSetCount = exerciseSetCounts.get(exerciseId);
-                            setsCompletedView.setText("Sets completed: " + newSetCount);
-                            
-                            String message = String.format("Set saved: %.1fkg × %d reps", finalWeight, finalReps);
-                            Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
-                            
-                            Log.d("HomeFragment", "Set saved successfully - Exercise: " + exerciseId + 
-                                  ", Weight: " + finalWeight + "kg, Reps: " + finalReps);
-                        });
+                        getActivity().runOnUiThread(() -> 
+                            Toast.makeText(getContext(), "Exercise not found. Please refresh and try again.", Toast.LENGTH_SHORT).show()
+                        );
                     }
+                    return;
+                }
+                
+                // Check if current session exists and is valid
+                if (currentSession != null) {
+                    WorkoutSession dbSession = database.workoutSessionDao().getWorkoutSessionById(currentSession.getId());
+                    if (dbSession == null) {
+                        Log.w("HomeFragment", "Current session ID " + currentSession.getId() + " no longer exists (likely deleted). Creating new session.");
+                        currentSession = null; // Reset to force creation of new session
+                    }
+                }
+                
+                // Create workout session if it doesn't exist or was invalidated
+                if (currentSession == null) {
+                    currentSession = new WorkoutSession(new Date());
+                    long sessionId = database.workoutSessionDao().insertWorkoutSession(currentSession);
+                    currentSession.setId((int) sessionId);
+                    Log.d("HomeFragment", "Created new workout session with ID: " + sessionId);
+                }
+                
+                int sessionIdToUse = currentSession.getId();
+                Log.d("HomeFragment", "Using session ID: " + sessionIdToUse + " for exercise: " + exerciseId + 
+                      " (Exercise: " + exercise.getName() + ")");
+                
+                // Create and save exercise record for this individual set
+                ExerciseRecord record = new ExerciseRecord(
+                    exerciseId, 
+                    sessionIdToUse,  // Use session ID
+                    1,  // Always 1 set per record
+                    finalReps
+                );
+                record.setWeight(finalWeight);
+                
+                Log.d("HomeFragment", "Inserting exercise record - Exercise: " + exerciseId + 
+                      " (" + exercise.getName() + "), Session: " + sessionIdToUse + 
+                      ", Weight: " + finalWeight + ", Reps: " + finalReps);
+                      
+                database.exerciseRecordDao().insertExerciseRecord(record);
+                
+                // Update set count
+                int currentSetCount = exerciseSetCounts.get(exerciseId);
+                exerciseSetCounts.put(exerciseId, currentSetCount + 1);
+                
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        // Reset reps counter for next set
+                        exerciseReps.put(exerciseId, 0);
+                        updateRepsDisplay(exerciseId);
+                        
+                        // Update sets completed display
+                        int newSetCount = exerciseSetCounts.get(exerciseId);
+                        setsCompletedView.setText("Sets completed: " + newSetCount);
+                        
+                        String message = String.format("Set saved: %.1fkg × %d reps", finalWeight, finalReps);
+                        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                        
+                        Log.d("HomeFragment", "Set saved successfully - Exercise: " + exerciseId + 
+                              ", Weight: " + finalWeight + "kg, Reps: " + finalReps);
+                    });
                 }
             } catch (Exception e) {
                 Log.e("HomeFragment", "Error saving set", e);
@@ -420,149 +520,33 @@ public class HomeFragment extends Fragment {
         });
     }
     
-    private void setupWorkoutButtons() {
-        binding.btnStartWorkout.setOnClickListener(v -> startWorkout());
-        binding.btnSaveWorkout.setOnClickListener(v -> saveWorkout());
-        
-        // Initially disable save button
-        binding.btnSaveWorkout.setEnabled(false);
-    }
+
     
-    private void startWorkout() {
-        Log.d("HomeFragment", "=== START WORKOUT BUTTON PRESSED ===");
-        Log.d("HomeFragment", "Workout in progress status: " + workoutInProgress);
+
+    
+
+    
+
+    
+    private void updateSaveButtonState(int exerciseId) {
+        // Get current weight and reps values
+        EditText weightInput = exerciseWeightViews.get(exerciseId);
+        TextView repsCounter = exerciseRepsViews.get(exerciseId);
+        MaterialButton saveButton = exerciseSaveButtons.get(exerciseId);
         
-        if (!workoutInProgress) {
-            Log.d("HomeFragment", "Starting new workout session...");
+        if (weightInput != null && repsCounter != null && saveButton != null) {
+            String weightText = weightInput.getText().toString().trim();
+            String repsText = repsCounter.getText().toString().trim();
             
-            // Save workout session to database first to get ID
-            executor.execute(() -> {
-                try {
-                    currentSession = new WorkoutSession(new Date());
-                    long sessionId = database.workoutSessionDao().insertWorkoutSession(currentSession);
-                    currentSession.setId((int) sessionId);
-                    
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(() -> {
-                            workoutInProgress = true;
-                            Log.d("HomeFragment", "Workout session created with ID: " + sessionId);
-                            
-                            // Reset all exercise data and UI
-                            resetWorkoutUI();
-                            
-                            // Update UI
-                            Log.d("HomeFragment", "Updating UI buttons...");
-                            binding.btnStartWorkout.setText("Workout In Progress...");
-                            binding.btnStartWorkout.setEnabled(false);
-                            binding.btnSaveWorkout.setEnabled(true);
-                            Log.d("HomeFragment", "UI updated - Start button disabled, Save button enabled");
-                            
-                            Toast.makeText(getContext(), "Workout started! Track your sets by entering weight and reps, then save each set.", Toast.LENGTH_LONG).show();
-                            Log.d("HomeFragment", "Workout session started successfully");
-                        });
-                    }
-                } catch (Exception e) {
-                    Log.e("HomeFragment", "Error starting workout session", e);
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(() -> 
-                            Toast.makeText(getContext(), "Error starting workout", Toast.LENGTH_SHORT).show()
-                        );
-                    }
-                }
-            });
-        } else {
-            Log.d("HomeFragment", "Workout already in progress - ignoring button press");
-        }
-    }
-    
-    private void saveWorkout() {
-        Log.d("HomeFragment", "=== SAVE WORKOUT BUTTON PRESSED ===");
-        Log.d("HomeFragment", "Workout in progress: " + workoutInProgress);
-        Log.d("HomeFragment", "Current session exists: " + (currentSession != null));
-        
-        if (workoutInProgress && currentSession != null) {
-            Log.d("HomeFragment", "Finishing workout session...");
+            // Enable save button if both weight and reps are valid
+            boolean hasWeight = !weightText.isEmpty() && !weightText.equals("0.0") && !weightText.equals("0");
+            boolean hasReps = !repsText.equals("0");
+            boolean shouldEnable = hasWeight && hasReps;
             
-            executor.execute(() -> {
-                try {
-                    // Update session end time
-                    currentSession.setEndTime(new Date());
-                    database.workoutSessionDao().updateWorkoutSession(currentSession);
-                    
-                    // Log summary of saved sets
-                    Log.d("HomeFragment", "Workout summary:");
-                    int totalSets = 0;
-                    for (Integer exerciseId : exerciseSetCounts.keySet()) {
-                        int sets = exerciseSetCounts.get(exerciseId);
-                        totalSets += sets;
-                        Log.d("HomeFragment", "  Exercise " + exerciseId + ": " + sets + " sets saved");
-                    }
-                    Log.d("HomeFragment", "Total sets saved: " + totalSets);
-                    
-                    final int finalTotalSets = totalSets;
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(() -> {
-                            Log.d("HomeFragment", "Updating UI after successful workout completion...");
-                            workoutInProgress = false;
-                            binding.btnStartWorkout.setText("Start Workout");
-                            binding.btnStartWorkout.setEnabled(true);
-                            binding.btnSaveWorkout.setEnabled(false);
-                            Log.d("HomeFragment", "UI reset - Start button enabled, Save button disabled");
-                            
-                            String message = String.format("Workout completed! %d total sets saved.", finalTotalSets);
-                            Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
-                            Log.d("HomeFragment", "Workout session completed successfully");
-                        });
-                    }
-                    
-                } catch (Exception e) {
-                    Log.e("HomeFragment", "Error completing workout", e);
-                    if (getActivity() != null) {
-                        getActivity().runOnUiThread(() -> 
-                            Toast.makeText(getContext(), "Error completing workout", Toast.LENGTH_SHORT).show()
-                        );
-                    }
-                }
-            });
-        } else {
-            Log.d("HomeFragment", "Cannot save - workout not in progress or session is null");
-            Toast.makeText(getContext(), "No active workout to save", Toast.LENGTH_SHORT).show();
+            saveButton.setEnabled(shouldEnable);
+            
+            Log.d("HomeFragment", "Exercise " + exerciseId + " - Weight: " + hasWeight + ", Reps: " + hasReps + ", Button enabled: " + shouldEnable);
         }
-    }
-    
-    private void resetWorkoutUI() {
-        Log.d("HomeFragment", "Resetting workout UI...");
-        
-        // Clear all exercise data
-        exerciseReps.clear();
-        exerciseWeights.clear();
-        exerciseSetCounts.clear();
-        
-        // Reset all UI elements for each exercise
-        if (favoriteExercises != null) {
-            for (Exercise exercise : favoriteExercises) {
-                int exerciseId = exercise.getId();
-                
-                // Reset weight input
-                EditText weightInput = exerciseWeightViews.get(exerciseId);
-                if (weightInput != null) {
-                    weightInput.setText("");
-                }
-                
-                // Reset reps counter
-                TextView repsCounter = exerciseRepsViews.get(exerciseId);
-                if (repsCounter != null) {
-                    repsCounter.setText("0");
-                }
-                
-                // Initialize values
-                exerciseReps.put(exerciseId, 0);
-                exerciseWeights.put(exerciseId, 0.0f);
-                exerciseSetCounts.put(exerciseId, 0);
-            }
-        }
-        
-        Log.d("HomeFragment", "Workout UI reset completed");
     }
     
     @Override
@@ -570,6 +554,26 @@ public class HomeFragment extends Fragment {
         super.onResume();
         // Reload exercises in case favorites changed in settings
         loadFavoriteExercises();
+        
+        // Validate current session in case it was deleted while on another tab
+        validateCurrentSession();
+    }
+    
+    private void validateCurrentSession() {
+        if (currentSession != null) {
+            executor.execute(() -> {
+                try {
+                    WorkoutSession dbSession = database.workoutSessionDao().getWorkoutSessionById(currentSession.getId());
+                    if (dbSession == null) {
+                        Log.w("HomeFragment", "Session validation failed: Session ID " + currentSession.getId() + " no longer exists. Resetting session.");
+                        currentSession = null;
+                    }
+                } catch (Exception e) {
+                    Log.e("HomeFragment", "Error validating session", e);
+                    currentSession = null; // Reset on any error
+                }
+            });
+        }
     }
     
     @Override

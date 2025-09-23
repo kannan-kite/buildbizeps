@@ -113,8 +113,7 @@ public class DashboardFragment extends Fragment {
                 // Update UI on main thread
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
-                        updateSummaryDisplay(summary);
-                        updateExerciseHistoryDisplay(exerciseHistory);
+                        updateCombinedSummaryDisplay(summary, exerciseHistory);
                     });
                 }
                 
@@ -130,24 +129,46 @@ public class DashboardFragment extends Fragment {
         });
     }
     
-    private void updateSummaryDisplay(DailySummary summary) {
-        String summaryText = String.format(Locale.getDefault(),
-            "📅 Date: %s\n\n" +
-            "🎯 Total Reps: %d (sets × reps)\n" +
-            "� Total Sets: %d\n" +
-            "🏋️ Exercises: %d different types\n" +
-            "💪 Workout Sessions: %d\n\n" +
-            "💡 Total Volume: %d reps across %d sets",
-            summary.getDate(),
-            summary.getTotalReps(),
-            summary.getTotalSets(),
-            summary.getTotalExercises(),
-            summary.getWorkoutCount(),
-            summary.getTotalReps(),
-            summary.getTotalSets()
-        );
+    /**
+     * Update the combined summary display with both stats and exercise details
+     */
+    private void updateCombinedSummaryDisplay(DailySummary summary, List<ExerciseHistoryDetail> exerciseHistory) {
+        StringBuilder combinedText = new StringBuilder();
         
-        binding.textDailySummary.setText(summaryText);
+        // Add summary stats
+        // combinedText.append(String.format(Locale.getDefault(),
+        //     "📅 %s\n\n" +
+        //     "🎯 Total Reps: %d\n" +
+        //     "🏋️ Total Sets: %d\n" +
+        //     "💪 Exercises: %d\n" +
+        //     "� Sessions: %d\n",
+        //     summary.getDate(),
+        //     summary.getTotalReps(),
+        //     summary.getTotalSets(),
+        //     summary.getTotalExercises(),
+        //     summary.getWorkoutCount()
+        // ));
+        
+        // Add exercise details if available
+        if (!exerciseHistory.isEmpty()) {
+            // combinedText.append("\n");
+            // combinedText.append("═══════════════════\n");
+            // combinedText.append("EXERCISE SUMMARY\n");
+            // combinedText.append("═══════════════════\n\n");
+            
+            for (int i = 0; i < exerciseHistory.size(); i++) {
+                ExerciseHistoryDetail detail = exerciseHistory.get(i);
+                combinedText.append(detail.getFormattedHistory());
+                
+                if (i < exerciseHistory.size() - 1) {
+                    combinedText.append("\n");
+                }
+            }
+        } else {
+            combinedText.append("\n\nNo exercise details recorded.");
+        }
+        
+        binding.textCombinedSummary.setText(combinedText.toString());
     }
     
     /**
@@ -190,29 +211,6 @@ public class DashboardFragment extends Fragment {
         return historyDetails;
     }
     
-    /**
-     * Update the detailed exercise history display
-     */
-    private void updateExerciseHistoryDisplay(List<ExerciseHistoryDetail> exerciseHistory) {
-        if (exerciseHistory.isEmpty()) {
-            binding.textExerciseHistory.setText("No exercises recorded for this date.");
-            return;
-        }
-        
-        StringBuilder historyText = new StringBuilder();
-        
-        for (int i = 0; i < exerciseHistory.size(); i++) {
-            ExerciseHistoryDetail detail = exerciseHistory.get(i);
-            historyText.append(detail.getFormattedHistory());
-            
-            if (i < exerciseHistory.size() - 1) {
-                historyText.append("\n\n");
-            }
-        }
-        
-        binding.textExerciseHistory.setText(historyText.toString());
-    }
-    
     private void setupHistoryButtons() {
         // Clear Selected Day button
         binding.btnClearDay.setOnClickListener(v -> {
@@ -227,32 +225,33 @@ public class DashboardFragment extends Fragment {
             
             String dateStr = dateFormat.format(selectedDate);
             Log.d("DashboardFragment", "Showing confirmation dialog for date: " + dateStr);
+            
             new AlertDialog.Builder(getContext())
                 .setTitle("Clear Day History")
-                .setMessage("Are you sure you want to delete all workout data for " + dateStr + "?")
-                .setPositiveButton("Delete", (dialog, which) -> {
-                    Log.d("DashboardFragment", "User confirmed deletion for " + dateStr);
+                .setMessage("Are you sure you want to clear all workout data for " + dateStr + "?")
+                .setPositiveButton("Clear", (dialog, which) -> {
+                    Log.d("DashboardFragment", "User confirmed deletion for date: " + dateStr);
                     clearDayHistory(selectedDate);
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> {
-                    Log.d("DashboardFragment", "User cancelled deletion for " + dateStr);
+                    Log.d("DashboardFragment", "User cancelled deletion for date: " + dateStr);
                 })
                 .show();
         });
         
         // Clear All History button
         binding.btnClearAll.setOnClickListener(v -> {
-            Log.d("DashboardFragment", "=== CLEAR ALL HISTORY BUTTON PRESSED ===");
-            Log.d("DashboardFragment", "Showing confirmation dialog for clearing all history");
+            Log.d("DashboardFragment", "=== CLEAR ALL BUTTON PRESSED ===");
+            
             new AlertDialog.Builder(getContext())
                 .setTitle("Clear All History")
-                .setMessage("⚠️ WARNING: This will permanently delete ALL workout history!\n\nThis action cannot be undone. Are you sure?")
-                .setPositiveButton("Delete All", (dialog, which) -> {
-                    Log.d("DashboardFragment", "User confirmed deletion of all history");
+                .setMessage("⚠️ WARNING: This will permanently delete ALL workout history!\\n\\nThis cannot be undone. Are you sure?")
+                .setPositiveButton("Clear All", (dialog, which) -> {
+                    Log.d("DashboardFragment", "User confirmed clearing all data");
                     clearAllHistory();
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> {
-                    Log.d("DashboardFragment", "User cancelled deletion of all history");
+                    Log.d("DashboardFragment", "User cancelled clearing all data");
                 })
                 .show();
         });

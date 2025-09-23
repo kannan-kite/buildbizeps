@@ -1,81 +1,140 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
+    android:background="@color/background_primary"
     tools:context=".ui.home.HomeFragment">
 
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/surface_primary"
+        app:elevation="0dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="Workout"
+            app:titleTextAppearance="@style/TextAppearance.App.Headline6"
+            app:titleTextColor="@color/on_surface_primary" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="100dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Empty State Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_no_favorites"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:visibility="gone"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="32dp">
+
+                    <ImageView
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:layout_marginBottom="16dp"
+                        android:alpha="0.6"
+                        android:src="@drawable/ic_fitness_center"
+                        app:tint="@color/primary" />
+
+                    <TextView
+                        android:id="@+id/text_no_favorites"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="No favorite exercises found"
+                        android:textAppearance="@style/TextAppearance.App.Headline6"
+                        android:textColor="@color/on_surface_primary" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:gravity="center"
+                        android:text="Add exercises to favorites in Settings to start your workout"
+                        android:textAppearance="@style/TextAppearance.App.Body2"
+                        android:textColor="@color/on_surface_secondary" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Exercises Container -->
+            <LinearLayout
+                android:id="@+id/exercises_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- Floating Action Buttons -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_gravity="bottom"
+        android:layout_margin="16dp"
+        android:orientation="horizontal">
 
-        <!-- Title -->
-        <TextView
-            android:id="@+id/text_workout_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="🏋️ Workout Tracker"
-            android:textAlignment="center"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="24dp"
-            android:textColor="@android:color/holo_blue_dark" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_start_workout"
+            style="@style/Widget.Material3.Button.UnelevatedButton"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:text="Start Workout"
+            android:textAppearance="@style/TextAppearance.App.Button"
+            app:backgroundTint="@color/primary"
+            app:cornerRadius="28dp"
+            app:icon="@drawable/ic_play_arrow"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp" />
 
-        <!-- Dynamic Exercises Container -->
-        <LinearLayout
-            android:id="@+id/exercises_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-            
-            <!-- Exercise sections will be added here dynamically -->
-            
-        </LinearLayout>
-
-        <!-- Workout Control Buttons -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:layout_marginTop="32dp">
-
-            <Button
-                android:id="@+id/btn_start_workout"
-                android:layout_width="0dp"
-                android:layout_height="56dp"
-                android:layout_weight="1"
-                android:text="Start Workout"
-                android:textSize="16sp"
-                android:layout_marginEnd="8dp"
-                android:backgroundTint="@android:color/holo_blue_dark" />
-
-            <Button
-                android:id="@+id/btn_save_workout"
-                android:layout_width="0dp"
-                android:layout_height="56dp"
-                android:layout_weight="1"
-                android:text="Save Workout"
-                android:textSize="16sp"
-                android:layout_marginStart="8dp"
-                android:backgroundTint="@android:color/holo_green_dark" />
-
-        </LinearLayout>
-
-        <!-- Instructions -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="💡 Go to Settings to add more exercises or change favorites"
-            android:textAlignment="center"
-            android:textSize="14sp"
-            android:textStyle="italic"
-            android:layout_marginTop="16dp"
-            android:textColor="@android:color/darker_gray" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_save_workout"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="56dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:enabled="false"
+            android:text="Complete"
+            android:textAppearance="@style/TextAppearance.App.Button"
+            app:cornerRadius="28dp"
+            app:icon="@drawable/ic_check"
+            app:iconGravity="textStart"
+            app:iconPadding="8dp"
+            app:strokeColor="@color/primary"
+            app:strokeWidth="2dp" />
 
     </LinearLayout>
 
-</ScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

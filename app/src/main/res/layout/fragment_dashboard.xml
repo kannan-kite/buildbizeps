@@ -1,150 +1,203 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res/auto"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
+    android:background="@color/background_primary"
     tools:context=".ui.dashboard.DashboardFragment">
 
-    <LinearLayout
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:background="@color/surface_primary"
+        app:elevation="0dp">
 
-        <!-- Title -->
-        <TextView
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="📅 Workout History"
-            android:textAlignment="center"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp"
-            android:textColor="@android:color/holo_blue_dark" />
+            android:layout_height="?attr/actionBarSize"
+            app:title="Dashboard"
+            app:titleTextAppearance="@style/TextAppearance.App.Headline6"
+            app:titleTextColor="@color/on_surface_primary" />
 
-        <!-- Calendar View -->
-        <CalendarView
-            android:id="@+id/calendarView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            android:background="@android:color/white"
-            android:padding="8dp" />
+    </com.google.android.material.appbar.AppBarLayout>
 
-        <!-- Daily Summary Title -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="📊 Daily Summary"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="12dp"
-            android:textColor="@android:color/holo_blue_dark" />
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="32dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- Daily Summary Card -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:color/white"
-            android:padding="16dp"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/text_daily_summary"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Select a date to view workout summary"
-                android:textSize="16sp"
-                android:lineSpacingExtra="4dp"
-                android:textColor="@android:color/black" />
-
-        </LinearLayout>
-
-        <!-- Detailed Exercise History Section -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="🏋️ Exercise Details"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="12dp"
-            android:textColor="@android:color/holo_blue_dark" />
-
-        <!-- Detailed Exercise History Card -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/white"
-            android:padding="16dp"
             android:orientation="vertical"
-            android:layout_marginBottom="24dp">
+            android:padding="16dp"
+            android:paddingBottom="24dp">
 
-            <TextView
-                android:id="@+id/text_exercise_history"
+            <!-- Calendar Card -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Select a date to view detailed exercise history"
-                android:textSize="16sp"
-                android:lineSpacingExtra="4dp"
-                android:textColor="@android:color/black"
-                android:fontFamily="monospace" />
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        android:text="Workout Calendar"
+                        android:textAppearance="@style/TextAppearance.App.Headline6"
+                        android:textColor="@color/on_surface_primary" />
+
+                    <CalendarView
+                        android:id="@+id/calendar_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Combined Summary Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_marginEnd="8dp"
+                            android:src="@drawable/ic_today"
+                            app:tint="@color/primary" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Workout Summary"
+                            android:textAppearance="@style/TextAppearance.App.Headline6"
+                            android:textColor="@color/on_surface_primary" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/text_combined_summary"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+                        android:lineSpacingExtra="4dp"
+                        android:text="No workouts recorded for today"
+                        android:textAppearance="@style/TextAppearance.App.Body1"
+                        android:textColor="@color/on_surface_secondary" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- History Management Buttons Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_marginEnd="8dp"
+                            android:src="@drawable/ic_check"
+                            app:tint="@color/primary" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="History Management"
+                            android:textAppearance="@style/TextAppearance.App.Headline6"
+                            android:textColor="@color/on_surface_primary" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_clear_day"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="8dp"
+                            android:text="Clear Selected Day"
+                            android:textColor="@color/primary"
+                            app:icon="@drawable/ic_today"
+                            app:iconTint="@color/primary" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_clear_all"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="8dp"
+                            android:text="Clear All History"
+                            android:textColor="@android:color/holo_red_dark"
+                            app:icon="@drawable/ic_check"
+                            app:iconTint="@android:color/holo_red_dark" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
 
-        <!-- History Management Section -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="🗂️ History Management"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginTop="24dp"
-            android:layout_marginBottom="12dp"
-            android:textColor="@android:color/holo_blue_dark" />
+    </androidx.core.widget.NestedScrollView>
 
-        <!-- History Control Buttons -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:layout_marginBottom="16dp">
-
-            <Button
-                android:id="@+id/btn_clear_day"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_weight="1"
-                android:text="Clear Selected Day"
-                android:textSize="14sp"
-                android:layout_marginEnd="8dp"
-                android:backgroundTint="@color/red_500" />
-
-            <Button
-                android:id="@+id/btn_clear_all"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_weight="1"
-                android:text="Clear All History"
-                android:textSize="14sp"
-                android:layout_marginStart="8dp"
-                android:backgroundTint="@android:color/holo_red_dark" />
-
-        </LinearLayout>
-
-        <!-- Motivational Section -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="💪 Keep pushing your limits!"
-            android:textAlignment="center"
-            android:textSize="18sp"
-            android:textStyle="italic"
-            android:layout_marginTop="24dp"
-            android:textColor="@android:color/holo_green_dark" />
-
-    </LinearLayout>
-
-</ScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
