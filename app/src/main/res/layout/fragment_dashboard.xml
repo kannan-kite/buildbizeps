@@ -61,6 +61,38 @@
 
         </LinearLayout>
 
+        <!-- Detailed Exercise History Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🏋️ Exercise Details"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="12dp"
+            android:textColor="@android:color/holo_blue_dark" />
+
+        <!-- Detailed Exercise History Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/white"
+            android:padding="16dp"
+            android:orientation="vertical"
+            android:layout_marginBottom="24dp">
+
+            <TextView
+                android:id="@+id/text_exercise_history"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Select a date to view detailed exercise history"
+                android:textSize="16sp"
+                android:lineSpacingExtra="4dp"
+                android:textColor="@android:color/black"
+                android:fontFamily="monospace" />
+
+        </LinearLayout>
+
         <!-- History Management Section -->
         <TextView
             android:layout_width="match_parent"
