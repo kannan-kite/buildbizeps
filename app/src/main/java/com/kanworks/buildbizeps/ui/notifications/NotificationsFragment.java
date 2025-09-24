@@ -136,7 +136,36 @@ public class NotificationsFragment extends Fragment {
         layout.addView(textLayout);
         layout.addView(favoriteSwitch);
         
+        // Add long-press listener for delete functionality
+        layout.setOnLongClickListener(v -> {
+            showDeleteExerciseDialog(exercise);
+            return true;
+        });
+        
         exercisesContainer.addView(layout);
+    }
+    
+    private void showDeleteExerciseDialog(Exercise exercise) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Delete Exercise")
+               .setMessage("Are you sure you want to delete \"" + exercise.getName() + "\"?\n\nThis will also remove all workout history for this exercise.")
+               .setPositiveButton("Delete", (dialog, which) -> {
+                   executor.execute(() -> {
+                       // First delete all exercise records for this exercise
+                       database.exerciseRecordDao().deleteRecordsByExerciseId(exercise.getId());
+                       // Then delete the exercise itself
+                       database.exerciseDao().deleteExercise(exercise);
+                       
+                       if (getActivity() != null) {
+                           getActivity().runOnUiThread(() -> {
+                               loadExercises();
+                               Toast.makeText(getContext(), "Exercise deleted", Toast.LENGTH_SHORT).show();
+                           });
+                       }
+                   });
+               })
+               .setNegativeButton("Cancel", null)
+               .show();
     }
     
     private void showAddExerciseDialog() {

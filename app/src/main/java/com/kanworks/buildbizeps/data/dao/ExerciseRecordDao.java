@@ -41,6 +41,9 @@ public interface ExerciseRecordDao {
     @Query("DELETE FROM exercise_records")
     void deleteAllRecords();
     
+    @Query("DELETE FROM exercise_records WHERE exerciseId = :exerciseId")
+    void deleteRecordsByExerciseId(int exerciseId);
+    
     @Insert
     long insertExerciseRecord(ExerciseRecord exerciseRecord);
     
